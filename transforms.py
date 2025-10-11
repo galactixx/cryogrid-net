@@ -70,3 +70,21 @@ class PairCompose:
         for t in self.transforms:
             img, target = t(img, target)
         return img, target
+
+
+class PairHorizontalFlip:
+    def __call__(
+        self, img: torch.Tensor, target: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        img = torch.flip(img, dims=[3])
+        target = torch.flip(target, dims=[3])
+        return img, target
+
+
+class PairVerticalFlip:
+    def __call__(
+        self, img: torch.Tensor, target: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        img = torch.flip(img, dims=[2])
+        target = torch.flip(target, dims=[2])
+        return img, target

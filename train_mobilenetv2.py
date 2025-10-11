@@ -6,7 +6,6 @@ import pandas as pd
 import torch
 import torch.nn as nn
 import torch.nn.functional as Fnn
-from huggingface_hub import snapshot_download
 from torch.cuda.amp import GradScaler, autocast
 from torch.nn import BCEWithLogitsLoss
 from torch.optim import AdamW
@@ -15,11 +14,11 @@ from torch.utils.data import DataLoader
 from torch_ema import ExponentialMovingAverage
 from tqdm.auto import tqdm
 
-from constants import ANNOTATIONS_FILENAME, IMAGES_FOLDER, SEED
+from constants import SEED
 from dataset import ImageCenters
 from gridbox_net import GridBoxMobileNet
 from preprocessing import create_image_centers, split_data
-from utils import ParamGroup, ProgressiveUnfreezer, seed_everything
+from utils import ParamGroup, ProgressiveUnfreezer, get_dataset_paths, seed_everything
 
 warnings.filterwarnings("ignore")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -105,16 +104,7 @@ def train_evaluate(
 
 if __name__ == "__main__":
     seed_everything(seed=SEED)
-    snapshot_path = snapshot_download(
-        "galactixx/cryogrid-boxes",
-        repo_type="dataset",
-        local_dir="data",
-        token=False,
-        local_dir_use_symlinks=False,
-    )
-    snapshot_path = Path(snapshot_path)
-    images_path = snapshot_path / IMAGES_FOLDER
-    annots_path = snapshot_path / ANNOTATIONS_FILENAME
+    images_path, annots_path = get_dataset_paths()
 
     annots = pd.read_csv(annots_path)
     centers = create_image_centers(images_path, annots)

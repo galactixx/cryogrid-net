@@ -2,11 +2,29 @@ import os
 import random
 from collections import deque
 from dataclasses import dataclass
-from typing import Any, Dict, List
+from pathlib import Path
+from typing import Any, Dict, List, Tuple
 
 import numpy as np
 import torch
+from huggingface_hub import snapshot_download
 from torch.optim import AdamW
+
+from constants import ANNOTATIONS_FILENAME, IMAGES_FOLDER
+
+
+def get_dataset_paths() -> Tuple[Path, Path]:
+    snapshot_path = snapshot_download(
+        "galactixx/cryogrid-boxes",
+        repo_type="dataset",
+        local_dir="data",
+        token=False,
+        local_dir_use_symlinks=False,
+    )
+    snapshot_path = Path(snapshot_path)
+    images_path = snapshot_path / IMAGES_FOLDER
+    annots_path = snapshot_path / ANNOTATIONS_FILENAME
+    return images_path, annots_path
 
 
 def unfreeze_layer(layer: torch.nn.Module) -> None:
