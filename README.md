@@ -52,6 +52,6 @@ position-000001,img_000001.jpg,L,997,711
 
 ## Results
 
-- **Dataset**: 996 images collected
+- **Dataset**: 986 images collected
 - **Test Performance**: 5.379 pixel average error
 - **Relative Error**: 0.56% (5.379/960 max dimension of 960×512 image)
