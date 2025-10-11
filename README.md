@@ -54,3 +54,22 @@ position-000001,img_000001.jpg,L,997,711
 - **Dataset**: 986 images collected
 - **Test Performance**: 5.379 pixel average error
 - **Relative Error**: 0.56% (5.379/960 max dimension of 960×512 image)
+
+## Sample Predictions
+
+Below are examples of the model's slot center predictions on test images:
+
+![Prediction Example 1](examples/preds_img_000230.jpg)
+*Grid box slot center detection - Image 000230*
+
+![Prediction Example 2](examples/preds_img_000373.jpg)
+*Grid box slot center detection - Image 000373*
+
+![Prediction Example 3](examples/preds_img_000626.jpg)
+*Grid box slot center detection - Image 000626*
+
+![Prediction Example 4](examples/preds_img_000783.jpg)
+*Grid box slot center detection - Image 000783*
+
+![Prediction Example 5](examples/preds_img_000967.jpg)
+*Grid box slot center detection - Image 000967*

@@ -81,6 +81,7 @@ def tta_evaluate(model: GridBoxMobileNet, loader: DataLoader) -> float:
 
 
 if __name__ == "__main__":
+    seed_everything(seed=SEED)
     images_path, annots_path = get_dataset_paths()
     annots = pd.read_csv(annots_path)
 
