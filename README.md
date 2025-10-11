@@ -29,6 +29,7 @@ The challenge: detect four distinct slot centers despite variations in lighting,
 - **Output**: 4-channel heatmap prediction (one per slot center)
 - **Input**: RGB images resized to 960×512 pixels
 - **Detection**: Rhombus-shaped heatmaps for robust center prediction
+- **Available on**: [HuggingFace Models](https://huggingface.co/galactixx/gridbox-net)
 
 ## Dataset
 
@@ -36,6 +37,7 @@ The challenge: detect four distinct slot centers despite variations in lighting,
 - **Annotations**: CSV with slot center coordinates (X, Y) for each slot type (L, T, R, B)
 - **Format**: Each image contains 4 slot center annotations
 - **Split**: Train/validation/test based on grid box positions
+- **Available on**: [HuggingFace Datasets](https://huggingface.co/datasets/galactixx/cryogrid-boxes)
 
 ```
 Position,File,Slot,X,Y
