@@ -108,7 +108,7 @@ if __name__ == "__main__":
 
     annots = pd.read_csv(annots_path)
     centers = create_image_centers(images_path, annots)
-    dataloaders = split_data(centers)
+    data = split_data(centers)
 
     model = GridBoxMobileNet()
     model.to(device)
@@ -179,7 +179,7 @@ if __name__ == "__main__":
         running_loss = 0.0
 
         for _, imgs, targets, _ in tqdm(
-            dataloaders.train, desc=f"Epoch {epoch+1}/{EPOCHS}"
+            data.train_loader, desc=f"Epoch {epoch+1}/{EPOCHS}"
         ):
             imgs, targets = imgs.to(device), targets.to(device)
 
@@ -198,7 +198,7 @@ if __name__ == "__main__":
 
         train_loss = running_loss / len(train_loader.dataset)
 
-        val_loss, dist = train_evaluate(model, dataloaders.val, ema, criterion)
+        val_loss, dist = train_evaluate(model, data.val_loader, ema, criterion)
         scheduler.step(val_loss)
 
         print(

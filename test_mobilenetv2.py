@@ -1,4 +1,8 @@
+import random
 import warnings
+from dataclasses import dataclass
+from pathlib import Path
+from typing import Dict, List, Optional
 
 import numpy as np
 import pandas as pd
@@ -7,17 +11,23 @@ from huggingface_hub import hf_hub_download
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-from constants import RESIZE_H, RESIZE_W
+from constants import RESIZE_H, RESIZE_W, SEED
 from gridbox_net import GridBoxMobileNet
-from preprocessing import create_image_centers, split_data
+from preprocessing import DataSplit, create_image_centers, split_data
 from transforms import PairHorizontalFlip, PairVerticalFlip
-from utils import get_dataset_paths
+from utils import get_dataset_paths, seed_everything
+from visualize import Point, visualize_slot_points
 
 warnings.filterwarnings("ignore")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 horizontal_flip = PairHorizontalFlip()
 vertical_flip = PairVerticalFlip()
+
+
+def init_points(batch_size: int) -> Dict[int, Dict[int, List[Point]]]:
+    return {bidx: {idx: list() for idx in range(4)} for bidx in range(batch_size)}
+
 
 transforms = [
     (
@@ -41,13 +51,21 @@ transforms = [
 ]
 
 
-def tta_evaluate(model: GridBoxMobileNet, loader: DataLoader) -> float:
-    model.eval()
+def tta_evaluate(
+    model: GridBoxMobileNet,
+    data: DataSplit,
+    display: bool = True,
+    save: bool = False,
+    path: Optional[Path] = None,
+) -> float:
     positions: Dict[int, List[float]] = dict()
 
+    cur_idx = 0
     with torch.no_grad():
-        for img_pos, imgs, targets, pts in tqdm(loader, desc="Evaluation"):
+        for img_pos, imgs, targets, pts in tqdm(data.test_loader, desc="Evaluation"):
             imgs, targets, pts = imgs.to(device), targets.to(device), pts.to(device)
+
+            points: Dict[int, Dict[int, List[Point]]] = init_points(imgs.size(0))
 
             for t, aug in transforms:
                 imgs_new, targets_new = t(imgs, targets)
@@ -60,7 +78,7 @@ def tta_evaluate(model: GridBoxMobileNet, loader: DataLoader) -> float:
                 for img_idx in range(B):
                     pos = img_pos[img_idx]
                     if pos not in positions:
-                        positions[pos] = []
+                        positions[pos] = list()
 
                     img_pred = preds[img_idx, :].clone()
                     img_pts = pts[img_idx, :]
@@ -72,7 +90,34 @@ def tta_evaluate(model: GridBoxMobileNet, loader: DataLoader) -> float:
 
                         dist = torch.dist(pt, img_pts[idx * 2 : idx * 2 + 2])
                         img_dist += dist.item()
+
+                        point = Point(pt[0].item(), pt[1].item())
+                        points[img_idx][idx].append(point)
+
                     positions[pos].append(img_dist / C)
+
+            if display:
+                index = random.randint(0, imgs.size(0) - 1)
+
+                img_points_agg: List[Point] = [None] * 4
+                for pt_idx, img_points in points[index].items():
+                    num_points = len(img_points)
+                    x = y = 0
+                    for img_point in img_points:
+                        x += img_point.x
+                        y += img_point.y
+                    x /= num_points
+                    y /= num_points
+                    img_points_agg[pt_idx] = Point(x, y)
+                visualize_slot_points(
+                    img_t=imgs[index],
+                    points=img_points_agg,
+                    save=save,
+                    path=path,
+                    filename=f"preds_{data.test[cur_idx + index].path.name}",
+                )
+
+                cur_idx += imgs.size(0)
 
         running_dist = sum(np.mean(dists) for dists in positions.values())
         eval_dist = running_dist / len(positions)
@@ -98,8 +143,9 @@ if __name__ == "__main__":
         weights_only=True,
     )
     model.load_state_dict(weights, strict=True)
+    model.eval()
 
     centers = create_image_centers(images_path, annots)
-    dataloaders = split_data(centers)
-    test_dist = tta_evaluate(model=model, loader=dataloaders.test)
+    data = split_data(centers)
+    test_dist = tta_evaluate(model=model, data=data)
     print(f"Test avg distance: {test_dist:.3f}...")
