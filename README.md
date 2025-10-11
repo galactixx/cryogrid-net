@@ -13,12 +13,6 @@ python test_mobilenetv2.py   # Testing
 
 This model automates slot center detection in grid boxes for cryo-electron microscopy (CRYO-EM) protein sample preparation. While showing promising results, the project was pivoted to a hardware-based pipeline solution.
 
-## Problem Statement
-
-CRYO-EM workflows require precise identification of slot centers in grid boxes.
-
-How to detect four distinct slot centers despite variations in lighting, orientation, and positioning?
-
 ## Model Architecture
 
 - **Backbone**: MobileNetV2 encoder
