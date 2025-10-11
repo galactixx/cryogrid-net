@@ -5,8 +5,8 @@ A neural network that automatically detects the center coordinates of each slot 
 ## Usage
 
 ```bash
-python train_mobilenetv2.py  # Training
-python test_mobilenetv2.py   # Testing
+python -m train_mobilenetv2  # Training
+python -m test_mobilenetv2   # Testing
 ```
 
 ## Overview
