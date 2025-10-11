@@ -15,12 +15,9 @@ This model automates slot center detection in grid boxes for cryo-electron micro
 
 ## Problem Statement
 
-CRYO-EM workflows require precise identification of slot centers in grid boxes for:
-- Automated sample positioning
-- Precise robotic handling  
-- Quality control
+CRYO-EM workflows require precise identification of slot centers in grid boxes.
 
-The challenge: detect four distinct slot centers despite variations in lighting, orientation, and positioning.
+How to detect four distinct slot centers despite variations in lighting, orientation, and positioning?
 
 ## Model Architecture
 
