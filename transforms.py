@@ -1,3 +1,12 @@
+"""
+Data augmentation transforms for CryogridNet training.
+
+Implements paired image and target augmentation transforms that maintain
+spatial correspondence between input images and heatmap targets. Includes
+horizontal/vertical flips, brightness/contrast adjustments, and composition
+class for applying multiple transforms sequentially.
+"""
+
 import random
 from typing import Tuple
 

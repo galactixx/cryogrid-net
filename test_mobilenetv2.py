@@ -1,3 +1,12 @@
+"""
+Model evaluation and testing script for CryogridNet.
+
+Implements comprehensive model evaluation using test-time augmentation (TTA)
+to improve prediction accuracy. Loads pre-trained model from HuggingFace Hub,
+evaluates on test dataset with flip augmentations, and generates visualization
+plots showing predicted slot centers overlaid on test images.
+"""
+
 import random
 import warnings
 from dataclasses import dataclass

@@ -1,3 +1,11 @@
+"""
+Dataset classes and data structures for CryogridNet.
+
+Defines core data structures for grid box images and slot center annotations.
+Includes GridBoxDataset class for loading images, generating rhombus-shaped
+heatmaps, and applying data augmentation transforms.
+"""
+
 from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Tuple

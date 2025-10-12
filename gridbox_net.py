@@ -1,3 +1,11 @@
+"""
+Neural network architecture definitions for CryogridNet.
+
+Implements U-Net architecture with MobileNetV2 backbone for slot center detection.
+Provides GridBoxNet and GridBoxMobileNet classes that output 4-channel heatmaps
+corresponding to the four slot positions (left, top, right, bottom).
+"""
+
 import segmentation_models_pytorch as smp
 import torch
 import torch.nn as nn

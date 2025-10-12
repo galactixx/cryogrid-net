@@ -1,3 +1,11 @@
+"""
+Data preprocessing and splitting utilities for CryogridNet.
+
+Handles creation of image center annotations from CSV data and implements
+train/validation/test splitting based on grid box positions. Provides DataSplit
+dataclass with cached DataLoader properties for efficient data loading.
+"""
+
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path

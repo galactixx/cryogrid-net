@@ -1,3 +1,10 @@
+"""
+Configuration constants for the CryogridNet project.
+
+Contains global constants for reproducibility, ImageNet normalization,
+image dimensions, and file naming conventions.
+"""
+
 SEED = 42
 INET_MEAN = [0.485, 0.456, 0.406]
 INET_STD = [0.229, 0.224, 0.225]

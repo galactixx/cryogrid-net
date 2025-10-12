@@ -1,3 +1,11 @@
+"""
+Visualization utilities for CryogridNet predictions and results.
+
+Provides functions for visualizing slot center predictions on grid box images.
+Includes utilities for denormalizing images from ImageNet preprocessing, plotting
+predicted slot centers with customizable markers, and saving visualization results.
+"""
+
 import os
 from dataclasses import dataclass
 from pathlib import Path

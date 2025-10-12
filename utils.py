@@ -1,3 +1,11 @@
+"""
+Utility functions and classes for CryogridNet project management.
+
+Provides essential utilities including dataset path resolution from HuggingFace Hub,
+progressive layer unfreezing for transfer learning, reproducible random seeding,
+and parameter group management for optimizer configuration.
+"""
+
 import os
 import random
 from collections import deque

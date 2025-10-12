@@ -1,3 +1,12 @@
+"""
+Training script for CryogridNet with progressive unfreezing.
+
+Implements complete training pipeline using Focal Loss for class imbalance
+in heatmap regression. Features progressive unfreezing of encoder layers,
+exponential moving average (EMA), mixed precision training, and early stopping.
+Includes comprehensive validation evaluation and automatic model checkpointing.
+"""
+
 import warnings
 from pathlib import Path
 from typing import Dict, List, Literal, Tuple, TypeAlias
