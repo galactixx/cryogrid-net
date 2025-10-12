@@ -24,11 +24,11 @@ class SlotCenterPoint:
     y: int
 
     @property
-    def scaled_y(self) -> int:
+    def scaled_y(self) -> float:
         return self.y * SCALE_Y
 
     @property
-    def scaled_x(self) -> int:
+    def scaled_x(self) -> float:
         return self.x * SCALE_X
 
 
@@ -73,12 +73,12 @@ class GridBoxDataset(Dataset):
         self.softness = softness
         self.train = train
 
+        self.normalize = transforms.Normalize(INET_MEAN, INET_STD)
         self.resizer = transforms.Compose(
             [
                 transforms.ToPILImage(),
                 transforms.Resize((512, 960)),
                 transforms.ToTensor(),
-                transforms.Normalize(INET_MEAN, INET_STD),
             ]
         )
 
@@ -130,6 +130,7 @@ class GridBoxDataset(Dataset):
         img_t = self.resizer(img)
         if self.train:
             img_t, heatmap_t = self.transforms(img_t, heatmap_t)
+        img_t = self.normalize(img_t)
 
-        pts_tensor = torch.tensor(center.points)
+        pts_tensor = torch.tensor(center.points, dtype=torch.float32)
         return center.position, img_t, heatmap_t, pts_tensor

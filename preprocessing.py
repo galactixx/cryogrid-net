@@ -10,6 +10,7 @@ from torch.utils.data import DataLoader
 
 from constants import SEED
 from dataset import GridBoxDataset, ImageCenters, SlotCenterPoint
+from utils import worker_init_fn
 
 
 @dataclass(frozen=True)
@@ -20,20 +21,31 @@ class DataSplit:
 
     @cached_property
     def train_loader(self) -> DataLoader:
+        def worker_init_fn(worker_id: int) -> None:
+            np.random.seed(SEED + worker_id)
+            random.seed(SEED + worker_id)
+
         dataset = GridBoxDataset(centers=self.train)
         g = torch.Generator()
         g.manual_seed(SEED)
-        return DataLoader(dataset, shuffle=True, batch_size=16, generator=g)
+        return DataLoader(
+            dataset,
+            shuffle=True,
+            batch_size=16,
+            generator=g,
+            num_workers=2,
+            worker_init_fn=worker_init_fn,
+        )
 
     @cached_property
     def val_loader(self) -> DataLoader:
         dataset = GridBoxDataset(centers=self.val, train=False)
-        return DataLoader(dataset, shuffle=False, batch_size=16)
+        return DataLoader(dataset, shuffle=False, batch_size=16, num_workers=2)
 
     @cached_property
     def test_loader(self) -> DataLoader:
         dataset = GridBoxDataset(centers=self.test, train=False)
-        return DataLoader(dataset, shuffle=False, batch_size=16)
+        return DataLoader(dataset, shuffle=False, batch_size=16, num_workers=2)
 
 
 def create_image_centers(path: Path, data: pd.DataFrame) -> List[ImageCenters]:
@@ -72,7 +84,7 @@ def create_image_centers(path: Path, data: pd.DataFrame) -> List[ImageCenters]:
 
 
 def split_data(centers: List[ImageCenters]) -> DataSplit:
-    def get_centers(positions: Set[str]) -> List[ImageCenters]:
+    def get_centers(positions: Set[int]) -> List[ImageCenters]:
         return [center for center in centers if center.position in positions]
 
     pos = list(set(center.position for center in centers))

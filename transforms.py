@@ -3,7 +3,6 @@ from typing import Tuple
 
 import torch
 import torchvision.transforms.functional as F
-from PIL import Image
 
 
 class RandomPairHorizontalFlip:
@@ -11,8 +10,8 @@ class RandomPairHorizontalFlip:
         self.p = p
 
     def __call__(
-        self, img: Image.Image, target: Image.Image
-    ) -> Tuple[Image.Image, Image.Image]:
+        self, img: torch.Tensor, target: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         if random.random() < self.p:
             img = torch.flip(img, dims=[2])
             target = torch.flip(target, dims=[2])
@@ -24,8 +23,8 @@ class RandomPairVerticalFlip:
         self.p = p
 
     def __call__(
-        self, img: Image.Image, target: Image.Image
-    ) -> Tuple[Image.Image, Image.Image]:
+        self, img: torch.Tensor, target: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         if random.random() < self.p:
             img = torch.flip(img, dims=[1])
             target = torch.flip(target, dims=[1])
@@ -38,8 +37,8 @@ class RandomPairBrightness:
         self.strength = strength
 
     def __call__(
-        self, img: Image.Image, target: Image.Image
-    ) -> Tuple[Image.Image, Image.Image]:
+        self, img: torch.Tensor, target: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         if random.random() < self.p:
             factor = random.uniform(*self.strength)
             img = F.adjust_brightness(img, factor)
@@ -52,8 +51,8 @@ class RandomPairContrast:
         self.strength = strength
 
     def __call__(
-        self, img: Image.Image, target: Image.Image
-    ) -> Tuple[Image.Image, Image.Image]:
+        self, img: torch.Tensor, target: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         if random.random() < self.p:
             factor = random.uniform(*self.strength)
             img = F.adjust_contrast(img, factor)
@@ -65,8 +64,8 @@ class PairCompose:
         self.transforms = transforms
 
     def __call__(
-        self, img: Image.Image, target: Image.Image
-    ) -> Tuple[Image.Image, Image.Image]:
+        self, img: torch.Tensor, target: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
         for t in self.transforms:
             img, target = t(img, target)
         return img, target

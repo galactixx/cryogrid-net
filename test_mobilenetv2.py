@@ -37,14 +37,14 @@ transforms = [
     (
         lambda i, t: horizontal_flip(i, t),
         lambda pred: torch.tensor(
-            [RESIZE_W - pred % RESIZE_W, pred // RESIZE_W],
+            [RESIZE_W - 1 - (pred % RESIZE_W), pred // RESIZE_W],
             device=device,
         ),
     ),
     (
         lambda i, t: vertical_flip(i, t),
         lambda pred: torch.tensor(
-            [pred % RESIZE_W, RESIZE_H - 1 - pred // RESIZE_W],
+            [pred % RESIZE_W, RESIZE_H - 1 - (pred // RESIZE_W)],
             device=device,
         ),
     ),

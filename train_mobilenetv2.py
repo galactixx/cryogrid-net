@@ -1,7 +1,8 @@
 import warnings
 from pathlib import Path
-from typing import List, Literal, Tuple, TypeAlias
+from typing import Dict, List, Literal, Tuple, TypeAlias
 
+import numpy as np
 import pandas as pd
 import torch
 import torch.nn as nn
@@ -14,7 +15,7 @@ from torch.utils.data import DataLoader
 from torch_ema import ExponentialMovingAverage
 from tqdm.auto import tqdm
 
-from constants import SEED
+from constants import RESIZE_W, SEED
 from dataset import ImageCenters
 from gridbox_net import GridBoxMobileNet
 from preprocessing import create_image_centers, split_data
@@ -196,7 +197,7 @@ if __name__ == "__main__":
 
             running_loss += loss.item() * imgs.size(0)
 
-        train_loss = running_loss / len(train_loader.dataset)
+        train_loss = running_loss / len(data.train_loader.dataset)
 
         val_loss, dist = train_evaluate(model, data.val_loader, ema, criterion)
         scheduler.step(val_loss)
