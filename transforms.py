@@ -15,6 +15,8 @@ import torchvision.transforms.functional as F
 
 
 class RandomPairHorizontalFlip:
+    """Randomly flip image and target horizontally with probability p."""
+
     def __init__(self, p: float = 0.5) -> None:
         self.p = p
 
@@ -28,6 +30,8 @@ class RandomPairHorizontalFlip:
 
 
 class RandomPairVerticalFlip:
+    """Randomly flip image and target vertically with probability p."""
+
     def __init__(self, p: float = 0.5) -> None:
         self.p = p
 
@@ -41,6 +45,8 @@ class RandomPairVerticalFlip:
 
 
 class RandomPairBrightness:
+    """Randomly adjust image brightness while keeping target unchanged."""
+
     def __init__(self, p: float = 0.5, strength=(0.7, 1.3)) -> None:
         self.p = p
         self.strength = strength
@@ -55,6 +61,8 @@ class RandomPairBrightness:
 
 
 class RandomPairContrast:
+    """Randomly adjust image contrast while keeping target unchanged."""
+
     def __init__(self, p: float = 0.5, strength=(0.7, 1.3)) -> None:
         self.p = p
         self.strength = strength
@@ -69,6 +77,8 @@ class RandomPairContrast:
 
 
 class PairCompose:
+    """Apply multiple transforms sequentially to image and target pairs."""
+
     def __init__(self, transforms: list) -> None:
         self.transforms = transforms
 
@@ -81,6 +91,8 @@ class PairCompose:
 
 
 class PairHorizontalFlip:
+    """Always flip image and target horizontally for TTA."""
+
     def __call__(
         self, img: torch.Tensor, target: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:
@@ -90,6 +102,8 @@ class PairHorizontalFlip:
 
 
 class PairVerticalFlip:
+    """Always flip image and target vertically for TTA."""
+
     def __call__(
         self, img: torch.Tensor, target: torch.Tensor
     ) -> Tuple[torch.Tensor, torch.Tensor]:

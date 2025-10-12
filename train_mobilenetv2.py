@@ -35,6 +35,8 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class FocalLoss(nn.Module):
+    """Focal Loss for addressing class imbalance in heatmap regression."""
+
     def __init__(
         self,
         alpha: float = 1.0,
@@ -66,6 +68,7 @@ def train_evaluate(
     ema: ExponentialMovingAverage,
     criterion: FocalLoss,
 ) -> Tuple[float, float]:
+    """Evaluate model on validation/test data using EMA weights."""
     model.eval()
     ema.store()
     ema.copy_to()
@@ -131,9 +134,11 @@ if __name__ == "__main__":
     stage4 = encoder[7:14]
     stage5 = encoder[14:19]
 
+    # Freeze all stages initially
     for stage in [stage1, stage2, stage3, stage4, stage5]:
         for param in stage.parameters():
             param.requires_grad = False
+        # Keep BatchNorm in eval mode for frozen stages
         for _, module in stage.named_modules():
             if isinstance(module, torch.nn.BatchNorm2d):
                 module.eval()

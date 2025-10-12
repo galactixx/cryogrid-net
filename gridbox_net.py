@@ -12,6 +12,8 @@ import torch.nn as nn
 
 
 class GridBoxNet(nn.Module):
+    """Base U-Net model for slot center detection with configurable backbone."""
+
     def __init__(
         self,
         backbone: str,
@@ -31,10 +33,13 @@ class GridBoxNet(nn.Module):
         )
 
     def forward(self, x: torch.Tensor) -> torch.Tensor:
+        """Forward pass through the U-Net model."""
         x = self.backbone(x)
         return x
 
 
 class GridBoxMobileNet(GridBoxNet):
+    """MobileNetV2-based U-Net model optimized for slot center detection."""
+
     def __init__(self, pretrained: bool = True) -> None:
         super().__init__(backbone="mobilenet_v2", pretrained=pretrained, num_classes=4)

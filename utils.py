@@ -11,7 +11,7 @@ import random
 from collections import deque
 from dataclasses import dataclass
 from pathlib import Path
-from typing import Any, Dict, List, Tuple
+from typing import Any, Dict, List, Optional, Tuple
 
 import numpy as np
 import torch
@@ -22,6 +22,7 @@ from constants import ANNOTATIONS_FILENAME, IMAGES_FOLDER
 
 
 def get_dataset_paths() -> Tuple[Path, Path]:
+    """Download dataset from HuggingFace Hub and return image and annotation paths."""
     snapshot_path = snapshot_download(
         "galactixx/cryogrid-boxes",
         repo_type="dataset",
@@ -40,6 +41,7 @@ def unfreeze_layer(layer: torch.nn.Module) -> None:
     for param in layer.parameters():
         param.requires_grad = True
 
+    # Keep BatchNorm in eval mode for stability
     for _, module in layer.named_modules():
         if isinstance(module, torch.nn.BatchNorm2d):
             module.eval()
@@ -56,6 +58,7 @@ class ParamGroup:
 
     @property
     def group(self) -> Dict[str, Any]:
+        """Return optimizer parameter group dictionary."""
         return {
             "params": self.layer.parameters(),
             "lr": self.lr,
@@ -72,10 +75,12 @@ class ProgressiveUnfreezer:
 
     @property
     def optimizer(self) -> AdamW:
+        """Get the current optimizer instance."""
         return self._optimizer
 
     @optimizer.setter
     def optimizer(self, optimizer: AdamW) -> None:
+        """Set the optimizer instance."""
         self._optimizer = optimizer
 
     def unfreeze(self, epoch: int) -> None:
@@ -104,6 +109,7 @@ def seed_everything(seed: int) -> None:
     torch.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
 
+    # Disable non-deterministic operations for reproducibility
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
     torch.backends.cuda.matmul.allow_tf32 = False

@@ -28,20 +28,26 @@ from transforms import (
 
 @dataclass(frozen=True)
 class SlotCenterPoint:
+    """Represents a single slot center point with coordinate scaling."""
+
     x: int
     y: int
 
     @property
     def scaled_y(self) -> float:
+        """Convert original Y coordinate to resized image coordinates."""
         return self.y * SCALE_Y
 
     @property
     def scaled_x(self) -> float:
+        """Convert original X coordinate to resized image coordinates."""
         return self.x * SCALE_X
 
 
 @dataclass(frozen=True)
 class ImageCenters:
+    """Container for all slot center points in a single image."""
+
     path: Path
     position: int
     left: SlotCenterPoint
@@ -51,6 +57,7 @@ class ImageCenters:
 
     @property
     def points(self) -> List[int]:
+        """Return all slot center coordinates as a flattened list."""
         return [
             self.left.scaled_x,
             self.left.scaled_y,
@@ -64,6 +71,8 @@ class ImageCenters:
 
 
 class GridBoxDataset(Dataset):
+    """PyTorch Dataset for loading grid box images and generating heatmap targets."""
+
     def __init__(
         self,
         centers: List[ImageCenters],
@@ -103,13 +112,19 @@ class GridBoxDataset(Dataset):
         return len(self.centers)
 
     def _make_rhombus_heatmap(self, cx: float, cy: float) -> np.ndarray:
+        """Generate rhombus-shaped heatmap centered at (cx, cy)."""
         ys = np.arange(self.out_h, dtype=np.float32)[:, None]
         xs = np.arange(self.out_w, dtype=np.float32)[None, :]
+
+        # Calculate rhombus distance metric
         s = (np.abs(xs - cx) / (self.rx + 1e-8)) + (np.abs(ys - cy) / (self.ry + 1e-8))
+
         if self.softness > 0:
+            # Soft rhombus with exponential decay outside boundary
             contrib = np.exp(-self.softness * (s - 1.0).clip(min=0.0) ** 2)
             contrib = np.where(s <= 1.0, 1.0, contrib).astype(np.float32)
         else:
+            # Hard rhombus boundary
             contrib = (s <= 1.0).astype(np.float32)
         return contrib
 
@@ -118,15 +133,14 @@ class GridBoxDataset(Dataset):
     ) -> Tuple[int, torch.Tensor, torch.Tensor, torch.Tensor]:
         center = self.centers[idx]
 
-        # load image
+        # Load and convert image from BGR to RGB
         img = cv2.imread(center.path, cv2.IMREAD_COLOR)
         img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-        h0, w0 = img.shape[:2]
 
-        # resize + normalize
+        # Get scaled coordinates for heatmap generation
         pts = np.array(center.points, dtype=np.float32).reshape(-1, 2)
 
-        # build one heatmap per slot
+        # Generate heatmaps for each slot center
         heatmaps = []
         for cx, cy in pts:
             hm = self._make_rhombus_heatmap(cx, cy)

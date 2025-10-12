@@ -35,6 +35,7 @@ vertical_flip = PairVerticalFlip()
 
 
 def init_points(batch_size: int) -> Dict[int, Dict[int, List[Point]]]:
+    """Initialize nested dictionary structure for collecting TTA predictions."""
     return {bidx: {idx: list() for idx in range(4)} for bidx in range(batch_size)}
 
 
@@ -67,6 +68,7 @@ def tta_evaluate(
     save: bool = False,
     path: Optional[Path] = None,
 ) -> float:
+    """Evaluate model with test-time augmentation (TTA)."""
     positions: Dict[int, List[float]] = dict()
 
     cur_idx = 0
@@ -74,12 +76,15 @@ def tta_evaluate(
         for img_pos, imgs, targets, pts in tqdm(data.test_loader, desc="Evaluation"):
             imgs, targets, pts = imgs.to(device), targets.to(device), pts.to(device)
 
+            # Initialize points collection for TTA averaging
             points: Dict[int, Dict[int, List[Point]]] = init_points(imgs.size(0))
 
+            # Apply each TTA transform
             for t, aug in transforms:
                 imgs_new, targets_new = t(imgs, targets)
                 logits = model(imgs_new)
 
+                # Convert logits to predictions
                 B, C = logits.size(0), logits.size(1)
                 logits = logits.view(B, C, -1)
                 preds = logits.argmax(dim=2)
@@ -92,6 +97,7 @@ def tta_evaluate(
                     img_pred = preds[img_idx, :].clone()
                     img_pts = pts[img_idx, :]
 
+                    # Calculate distance error for this augmentation
                     img_dist = 0
                     for idx in range(C):
                         pred = img_pred[idx]
@@ -105,9 +111,11 @@ def tta_evaluate(
 
                     positions[pos].append(img_dist / C)
 
+            # Visualize predictions if requested
             if display:
                 index = random.randint(0, imgs.size(0) - 1)
 
+                # Average predictions across all TTA transforms
                 img_points_agg: List[Point] = [None] * 4
                 for pt_idx, img_points in points[index].items():
                     num_points = len(img_points)
@@ -118,6 +126,7 @@ def tta_evaluate(
                     x /= num_points
                     y /= num_points
                     img_points_agg[pt_idx] = Point(x, y)
+
                 visualize_slot_points(
                     img_t=imgs[index],
                     points=img_points_agg,
@@ -128,6 +137,7 @@ def tta_evaluate(
 
                 cur_idx += imgs.size(0)
 
+        # Calculate average distance across all positions
         running_dist = sum(np.mean(dists) for dists in positions.values())
         eval_dist = running_dist / len(positions)
 

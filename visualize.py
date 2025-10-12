@@ -20,6 +20,8 @@ from constants import INET_MEAN, INET_STD
 
 @dataclass(frozen=True)
 class Point:
+    """Simple 2D point with x and y coordinates."""
+
     x: float
     y: float
 
@@ -33,7 +35,8 @@ def visualize_slot_points(
     point_color: str = "red",
     point_size: int = 40,
 ) -> None:
-    # Prepare image
+    """Visualize predicted slot centers overlaid on the input image."""
+    # Denormalize image from ImageNet preprocessing
     img = img_t.detach().cpu().permute(1, 2, 0).numpy()
     img = (img * np.array(INET_STD) + np.array(INET_MEAN)).clip(0, 1)
 
