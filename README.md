@@ -2,6 +2,14 @@
 
 A neural network that automatically detects the center coordinates of each slot in a grid box used for CRYO-EM protein freezing. Uses U-Net with MobileNetV2 backbone to predict four slot centers (left, top, right, bottom) via heatmap regression.
 
+## Installation
+
+Install the required dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
 ## Usage
 
 ```bash
