@@ -23,7 +23,7 @@ from tqdm.auto import tqdm
 from constants import RESIZE_H, RESIZE_W, SEED
 from gridbox_net import GridBoxMobileNet
 from preprocessing import DataSplit, create_image_centers, split_data
-from transforms import PairHorizontalFlip, PairVerticalFlip
+from transforms import PairHorizontalFlip
 from utils import get_dataset_paths, seed_everything
 from visualize import Point, visualize_slot_points
 
@@ -31,7 +31,6 @@ warnings.filterwarnings("ignore")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 horizontal_flip = PairHorizontalFlip()
-vertical_flip = PairVerticalFlip()
 
 
 def init_points(batch_size: int) -> Dict[int, Dict[int, List[Point]]]:
@@ -48,13 +47,6 @@ transforms = [
         lambda i, t: horizontal_flip(i, t),
         lambda pred: torch.tensor(
             [RESIZE_W - 1 - (pred % RESIZE_W), pred // RESIZE_W],
-            device=device,
-        ),
-    ),
-    (
-        lambda i, t: vertical_flip(i, t),
-        lambda pred: torch.tensor(
-            [pred % RESIZE_W, RESIZE_H - 1 - (pred // RESIZE_W)],
             device=device,
         ),
     ),

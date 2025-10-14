@@ -112,7 +112,7 @@ def split_data(centers: List[ImageCenters]) -> DataSplit:
     pos.sort()
 
     # Split positions: 70% train, 15% val, 15% test
-    train_pos, temp_pos = train_test_split(pos, test_size=0.3, random_state=SEED)
+    train_pos, temp_pos = train_test_split(pos, test_size=0.2, random_state=SEED)
     test_pos, val_pos = train_test_split(temp_pos, test_size=0.5, random_state=SEED)
 
     # Create splits based on position groups
