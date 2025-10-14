@@ -4,10 +4,23 @@ A neural network that automatically detects the center coordinates of each slot 
 
 ## Installation
 
-Install the required dependencies:
+If you already have PyTorch with the correct CUDA version installed, simply run:
 
 ```bash
 pip install -r requirements.txt
+```
+
+If you need to install the CUDA 12.4–compatible PyTorch wheels first, run:
+
+```bash
+pip install torch==2.6.0+cu124 torchvision==0.21.0+cu124 --extra-index-url https://download.pytorch.org/whl/cu124
+pip install -r requirements.txt
+```
+
+Alternatively, you can install everything in one command:
+
+```bash
+pip install -r requirements.txt --extra-index-url https://download.pytorch.org/whl/cu124
 ```
 
 ## Usage
