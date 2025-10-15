@@ -121,7 +121,7 @@ if __name__ == "__main__":
         description="Train a UNet heatmap regression model using different CNN encoders."
     )
     parser.add_argument(
-        "--model",
+        "--encoder",
         choices=["mobilenet_v2", "densenet121"],
         required=True,
         help="The pretrained CNN encoder to use.",
@@ -135,9 +135,9 @@ if __name__ == "__main__":
     centers = create_image_centers(images_path, annots)
     data = split_data(centers)
 
-    filename = args.model.replace("_", "")
+    filename = args.encoder.replace("_", "")
 
-    if args.model == "mobilenet_v2":
+    if args.encoder == "mobilenet_v2":
         model = GridBoxMobileNet()
         encoder = model.backbone.encoder.features
 

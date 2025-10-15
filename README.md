@@ -26,10 +26,10 @@ pip install -r requirements.txt --extra-index-url https://download.pytorch.org/w
 ## Usage
 
 ```bash
-python train.py --model mobilenet_v2    # Train with MobileNetV2 backbone
-python train.py --model densenet121     # Train with DenseNet121 backbone
-python test.py --model mobilenet_v2     # Test with MobileNetV2 backbone
-python test.py --model densenet121      # Test with DenseNet121 backbone
+python train.py --encoder=mobilenet_v2    # Train with MobileNetV2 encoder
+python train.py --encoder=densenet121     # Train with DenseNet121 encoder
+python test.py --encoder=mobilenet_v2     # Test with MobileNetV2 encoder
+python test.py --encoder=densenet121      # Test with DenseNet121 encoder
 ```
 
 ## Overview

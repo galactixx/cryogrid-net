@@ -1,7 +1,7 @@
 """
 Neural network architecture definitions for CryogridNet.
 
-Implements U-Net architectures with DenseNet121 and MobileNetV2 backbone for
+Implements U-Net architectures with DenseNet121 and MobileNetV2 encoders for
 slot center detection. Provides GridBoxNet, GridBoxDenseNet, and
 GridBoxMobileNet classes that output 4-channel heatmaps corresponding
 to the four slot positions (left, top, right, bottom).
@@ -13,16 +13,16 @@ import torch.nn as nn
 
 
 class GridBoxNet(nn.Module):
-    """Base U-Net model for slot center detection with configurable backbone."""
+    """Base U-Net model for slot center detection with configurable encoder."""
 
     def __init__(
         self,
-        backbone: str,
+        encoder: str,
         pretrained: bool = True,
         num_classes: int = 4,
     ) -> None:
         super().__init__()
-        self.encoder = backbone
+        self.encoder = encoder
         self.encoder_weights = "imagenet" if pretrained else None
         self.num_classes = num_classes
 
@@ -43,11 +43,11 @@ class GridBoxMobileNet(GridBoxNet):
     """MobileNetV2-based U-Net model optimized for slot center detection."""
 
     def __init__(self, pretrained: bool = True) -> None:
-        super().__init__(backbone="mobilenet_v2", pretrained=pretrained, num_classes=4)
+        super().__init__(encoder="mobilenet_v2", pretrained=pretrained, num_classes=4)
 
 
 class GridBoxDenseNet(GridBoxNet):
     """DenseNet121-based U-Net model optimized for slot center detection."""
 
     def __init__(self, pretrained: bool = True) -> None:
-        super().__init__(backbone="densenet121", pretrained=pretrained, num_classes=4)
+        super().__init__(encoder="densenet121", pretrained=pretrained, num_classes=4)

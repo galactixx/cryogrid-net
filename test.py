@@ -137,14 +137,14 @@ if __name__ == "__main__":
         description="Test a UNet heatmap regression model using different CNN encoders."
     )
     parser.add_argument(
-        "--model",
+        "--encoder",
         choices=["mobilenet_v2", "densenet121"],
         required=True,
         help="The pretrained CNN encoder to use.",
     )
     args = parser.parse_args()
 
-    if args.model == "mobilenet_v2":
+    if args.encoder == "mobilenet_v2":
         filename = "mobilenetv2.bin"
         model = GridBoxMobileNet()
     else:
