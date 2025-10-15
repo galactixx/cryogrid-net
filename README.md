@@ -1,6 +1,6 @@
 # CryogridNet
 
-A neural network that automatically detects the center coordinates of each slot in a grid box used for CRYO-EM protein freezing. Uses U-Net with MobileNetV2 backbone to predict four slot centers (left, top, right, bottom) via heatmap regression.
+A series of neural networks that automatically detect the center coordinates of each slot in a grid box used for CRYO-EM protein freezing. Provided are U-Net models with a MobileNetV2 or DenseNet121 pretrained encoder to predict four slot centers via heatmap regression.
 
 ## Installation
 
@@ -26,8 +26,10 @@ pip install -r requirements.txt --extra-index-url https://download.pytorch.org/w
 ## Usage
 
 ```bash
-python -m train_mobilenetv2  # Training
-python -m test_mobilenetv2   # Testing
+python train.py --model mobilenet_v2    # Train with MobileNetV2 backbone
+python train.py --model densenet121     # Train with DenseNet121 backbone
+python test.py --model mobilenet_v2     # Test with MobileNetV2 backbone
+python test.py --model densenet121      # Test with DenseNet121 backbone
 ```
 
 ## Overview
@@ -36,7 +38,7 @@ This model automates slot center detection in grid boxes for cryo-electron micro
 
 ## Model Architecture
 
-- **Backbone**: MobileNetV2 encoder
+- **Backbone Options**: MobileNetV2 or DenseNet121 encoder
 - **Architecture**: U-Net decoder for spatial localization
 - **Output**: 4-channel heatmap prediction (one per slot center)
 - **Input**: RGB images resized to 960×512 pixels
@@ -67,8 +69,10 @@ position-000001,img_000001.jpg,L,997,711
 ## Results
 
 - **Dataset**: 986 images collected
-- **Test Performance**: 5.16 pixel average error
-- **Relative Error**: 0.53% (5.16/960 max dimension of 960×512 image)
+- **MobileNetV2 Performance**: 5.16 pixel average error
+- **DenseNet121 Performance**: 4.21 pixel average error
+- **Relative Error**: 0.44% (4.21/960 max dimension of 960×512 image)
+- **Model Comparison**: DenseNet121 shows 18.4% improvement over MobileNetV2
 
 ## Sample Predictions
 

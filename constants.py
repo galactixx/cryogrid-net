@@ -23,3 +23,6 @@ SCALE_X, SCALE_Y = RESIZE_W / W, RESIZE_H / H
 # Dataset file naming conventions
 ANNOTATIONS_FILENAME = "annotations.csv"
 IMAGES_FOLDER = "images"
+
+# Number of center points for grid-based detection
+NUM_CENTERS = 4

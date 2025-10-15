@@ -7,7 +7,6 @@ predicted slot centers with customizable markers, and saving visualization resul
 """
 
 import os
-from dataclasses import dataclass
 from pathlib import Path
 from typing import List, Literal, Optional
 
@@ -18,17 +17,9 @@ import torch
 from constants import INET_MEAN, INET_STD
 
 
-@dataclass(frozen=True)
-class Point:
-    """Simple 2D point with x and y coordinates."""
-
-    x: float
-    y: float
-
-
 def visualize_slot_points(
     img_t: torch.Tensor,
-    points: List[Point],
+    points: List[torch.Tensor],
     save: bool,
     path: Optional[Path],
     filename: Optional[str],
@@ -47,10 +38,11 @@ def visualize_slot_points(
     col = 1
 
     # Plot each individual point
-    for i, (label, p) in enumerate(zip(labels, points)):
+    for i, label in enumerate(labels):
+        pt = points[i].cpu()
         ax = plt.subplot(1, ncols, col)
         ax.imshow(img)
-        ax.scatter(p.x, p.y, c=point_color, s=point_size, edgecolors="black")
+        ax.scatter(pt[0], pt[1], c=point_color, s=point_size, edgecolors="black")
         ax.set_title(f"{label} Point")
         ax.axis("off")
         col += 1

@@ -99,3 +99,14 @@ class PairHorizontalFlip:
         img = torch.flip(img, dims=[3])
         target = torch.flip(target, dims=[3])
         return img, target
+
+
+class PairVerticalFlip:
+    """Always flip image and target vertically for TTA."""
+
+    def __call__(
+        self, img: torch.Tensor, target: torch.Tensor
+    ) -> Tuple[torch.Tensor, torch.Tensor]:
+        img = torch.flip(img, dims=[2])
+        target = torch.flip(target, dims=[2])
+        return img, target

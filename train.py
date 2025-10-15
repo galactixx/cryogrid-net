@@ -7,6 +7,7 @@ exponential moving average (EMA), mixed precision training, and early stopping.
 Includes comprehensive validation evaluation and automatic model checkpointing.
 """
 
+import argparse
 import warnings
 from pathlib import Path
 from typing import Dict, List, Literal, Tuple, TypeAlias
@@ -26,7 +27,7 @@ from tqdm.auto import tqdm
 
 from constants import RESIZE_W, SEED
 from dataset import ImageCenters
-from gridbox_net import GridBoxMobileNet
+from gridbox_net import GridBoxDenseNet, GridBoxMobileNet
 from preprocessing import create_image_centers, split_data
 from utils import ParamGroup, ProgressiveUnfreezer, get_dataset_paths, seed_everything
 
@@ -63,7 +64,7 @@ class FocalLoss(nn.Module):
 
 
 def train_evaluate(
-    model: GridBoxMobileNet,
+    model: torch.nn.Module,
     loader: DataLoader,
     ema: ExponentialMovingAverage,
     criterion: FocalLoss,
@@ -116,6 +117,17 @@ def train_evaluate(
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Train a UNet heatmap regression model using different CNN encoders."
+    )
+    parser.add_argument(
+        "--model",
+        choices=["mobilenet_v2", "densenet121"],
+        required=True,
+        help="The pretrained CNN encoder to use.",
+    )
+    args = parser.parse_args()
+
     seed_everything(seed=SEED)
     images_path, annots_path = get_dataset_paths()
 
@@ -123,16 +135,35 @@ if __name__ == "__main__":
     centers = create_image_centers(images_path, annots)
     data = split_data(centers)
 
-    model = GridBoxMobileNet()
+    filename = args.model.replace("_", "")
+
+    if args.model == "mobilenet_v2":
+        model = GridBoxMobileNet()
+        encoder = model.backbone.encoder.features
+
+        stage1 = encoder[0:2]
+        stage2 = encoder[2:4]
+        stage3 = encoder[4:7]
+        stage4 = encoder[7:14]
+        stage5 = encoder[14:19]
+    else:
+        model = GridBoxDenseNet()
+        encoder = model.backbone.encoder.features
+
+        stage1 = torch.nn.Sequential(
+            encoder.conv0,
+            encoder.norm0,
+            encoder.relu0,
+            encoder.pool0,
+        )
+        stage2 = encoder.denseblock1
+        stage3 = torch.nn.Sequential(encoder.transition1, encoder.denseblock2)
+        stage4 = torch.nn.Sequential(encoder.transition2, encoder.denseblock3)
+        stage5 = torch.nn.Sequential(
+            encoder.transition3, encoder.denseblock4, encoder.norm5
+        )
+
     model.to(device)
-
-    encoder = model.backbone.encoder.features
-
-    stage1 = encoder[0:2]
-    stage2 = encoder[2:4]
-    stage3 = encoder[4:7]
-    stage4 = encoder[7:14]
-    stage5 = encoder[14:19]
 
     # Freeze all stages initially
     for stage in [stage1, stage2, stage3, stage4, stage5]:
@@ -227,7 +258,7 @@ if __name__ == "__main__":
             no_improve = 0
             best_loss = val_loss
             ema.copy_to()
-            torch.save(model.state_dict(), "gridbox-mobilenetv2.pth")
+            torch.save(model.state_dict(), f"{filename}.bin")
             ema.restore()
         else:
             no_improve += 1

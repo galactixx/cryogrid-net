@@ -7,6 +7,7 @@ evaluates on test dataset with flip augmentations, and generates visualization
 plots showing predicted slot centers overlaid on test images.
 """
 
+import argparse
 import random
 import warnings
 from dataclasses import dataclass
@@ -20,22 +21,25 @@ from huggingface_hub import hf_hub_download
 from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
-from constants import RESIZE_H, RESIZE_W, SEED
-from gridbox_net import GridBoxMobileNet
+from constants import NUM_CENTERS, RESIZE_H, RESIZE_W, SEED
+from gridbox_net import GridBoxDenseNet, GridBoxMobileNet
 from preprocessing import DataSplit, create_image_centers, split_data
-from transforms import PairHorizontalFlip
+from transforms import PairHorizontalFlip, PairVerticalFlip
 from utils import get_dataset_paths, seed_everything
-from visualize import Point, visualize_slot_points
+from visualize import visualize_slot_points
 
 warnings.filterwarnings("ignore")
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 horizontal_flip = PairHorizontalFlip()
+vertical_flip = PairVerticalFlip()
 
 
-def init_points(batch_size: int) -> Dict[int, Dict[int, List[Point]]]:
+def init_points(batch_size: int) -> Dict[int, Dict[int, List[torch.Tensor]]]:
     """Initialize nested dictionary structure for collecting TTA predictions."""
-    return {bidx: {idx: list() for idx in range(4)} for bidx in range(batch_size)}
+    return {
+        bidx: {idx: list() for idx in range(NUM_CENTERS)} for bidx in range(batch_size)
+    }
 
 
 transforms = [
@@ -46,7 +50,14 @@ transforms = [
     (
         lambda i, t: horizontal_flip(i, t),
         lambda pred: torch.tensor(
-            [RESIZE_W - 1 - (pred % RESIZE_W), pred // RESIZE_W],
+            [RESIZE_W - 1 - pred % RESIZE_W, pred // RESIZE_W],
+            device=device,
+        ),
+    ),
+    (
+        lambda i, t: vertical_flip(i, t),
+        lambda pred: torch.tensor(
+            [pred % RESIZE_W, RESIZE_H - 1 - (pred // RESIZE_W)],
             device=device,
         ),
     ),
@@ -54,7 +65,7 @@ transforms = [
 
 
 def tta_evaluate(
-    model: GridBoxMobileNet,
+    model: torch.nn.Module,
     data: DataSplit,
     display: bool = True,
     save: bool = False,
@@ -68,68 +79,53 @@ def tta_evaluate(
         for img_pos, imgs, targets, pts in tqdm(data.test_loader, desc="Evaluation"):
             imgs, targets, pts = imgs.to(device), targets.to(device), pts.to(device)
 
-            # Initialize points collection for TTA averaging
-            points: Dict[int, Dict[int, List[Point]]] = init_points(imgs.size(0))
+            points: Dict[int, Dict[int, List[torch.Tensor]]] = init_points(imgs.size(0))
 
-            # Apply each TTA transform
             for t, aug in transforms:
                 imgs_new, targets_new = t(imgs, targets)
                 logits = model(imgs_new)
 
-                # Convert logits to predictions
                 B, C = logits.size(0), logits.size(1)
                 logits = logits.view(B, C, -1)
                 preds = logits.argmax(dim=2)
 
                 for img_idx in range(B):
-                    pos = img_pos[img_idx]
-                    if pos not in positions:
-                        positions[pos] = list()
-
                     img_pred = preds[img_idx, :].clone()
-                    img_pts = pts[img_idx, :]
 
-                    # Calculate distance error for this augmentation
-                    img_dist = 0
                     for idx in range(C):
                         pred = img_pred[idx]
                         pt = aug(pred)
-
-                        dist = torch.dist(pt, img_pts[idx * 2 : idx * 2 + 2])
-                        img_dist += dist.item()
-
-                        point = Point(pt[0].item(), pt[1].item())
+                        point = torch.tensor([pt[0], pt[1]], device=device)
                         points[img_idx][idx].append(point)
 
-                    positions[pos].append(img_dist / C)
+            index = random.randint(0, imgs.size(0) - 1)
 
-            # Visualize predictions if requested
-            if display:
-                index = random.randint(0, imgs.size(0) - 1)
+            for img_idx, t_points in points.items():
+                pos = img_pos[img_idx]
+                if pos not in positions:
+                    positions[pos] = list()
 
-                # Average predictions across all TTA transforms
-                img_points_agg: List[Point] = [None] * 4
-                for pt_idx, img_points in points[index].items():
-                    num_points = len(img_points)
-                    x = y = 0
-                    for img_point in img_points:
-                        x += img_point.x
-                        y += img_point.y
-                    x /= num_points
-                    y /= num_points
-                    img_points_agg[pt_idx] = Point(x, y)
+                img_pts = pts[img_idx, :]
+                img_points_agg: List[torch.Tensor] = [None] * NUM_CENTERS
+                for pt_idx, img_points in t_points.items():
+                    img_points_agg[pt_idx] = torch.stack(img_points).float().mean(dim=0)
 
-                visualize_slot_points(
-                    img_t=imgs[index],
-                    points=img_points_agg,
-                    save=save,
-                    path=path,
-                    filename=f"preds_{data.test[cur_idx + index].path.name}",
-                )
+                agg_pts = torch.stack(img_points_agg)
+                gt_pts = img_pts.view(NUM_CENTERS, 2)
+                img_dist = (agg_pts - gt_pts).norm(dim=1).mean().item()
+                positions[pos].append(img_dist)
 
-                cur_idx += imgs.size(0)
+                if display and img_idx == index:
+                    visualize_slot_points(
+                        img_t=imgs[index],
+                        points=img_points_agg,
+                        save=save,
+                        path=path,
+                        filename=f"preds_{data.test[cur_idx + index].path.name}",
+                    )
 
-        # Calculate average distance across all positions
+            cur_idx += imgs.size(0)
+
         running_dist = sum(np.mean(dists) for dists in positions.values())
         eval_dist = running_dist / len(positions)
 
@@ -137,15 +133,30 @@ def tta_evaluate(
 
 
 if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Test a UNet heatmap regression model using different CNN encoders."
+    )
+    parser.add_argument(
+        "--model",
+        choices=["mobilenet_v2", "densenet121"],
+        required=True,
+        help="The pretrained CNN encoder to use.",
+    )
+    args = parser.parse_args()
+
+    if args.model == "mobilenet_v2":
+        filename = "mobilenetv2.bin"
+        model = GridBoxMobileNet()
+    else:
+        filename = "densenet121.bin"
+        model = GridBoxDenseNet()
+
     seed_everything(seed=SEED)
     images_path, annots_path = get_dataset_paths()
     annots = pd.read_csv(annots_path)
 
-    model_path = hf_hub_download(
-        "galactixx/gridbox-net", "gridbox-mobilenetv2.pth", token=False
-    )
+    model_path = hf_hub_download("galactixx/gridbox-net", filename, token=False)
 
-    model = GridBoxMobileNet()
     model.to(device)
 
     weights = torch.load(

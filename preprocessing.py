@@ -22,6 +22,11 @@ from constants import SEED
 from dataset import GridBoxDataset, ImageCenters, SlotCenterPoint
 
 
+def worker_init_fn(worker_id: int) -> None:
+    np.random.seed(SEED + worker_id)
+    random.seed(SEED + worker_id)
+
+
 @dataclass(frozen=True)
 class DataSplit:
     """Container for train/validation/test data splits with cached DataLoaders."""
@@ -33,11 +38,6 @@ class DataSplit:
     @cached_property
     def train_loader(self) -> DataLoader:
         """Create DataLoader for training data with shuffling and augmentation."""
-
-        def worker_init_fn(worker_id: int) -> None:
-            np.random.seed(SEED + worker_id)
-            random.seed(SEED + worker_id)
-
         dataset = GridBoxDataset(centers=self.train)
         g = torch.Generator()
         g.manual_seed(SEED)
