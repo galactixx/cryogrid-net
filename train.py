@@ -122,7 +122,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--encoder",
-        choices=["mobilenet_v2", "densenet121"],
+        choices=["mobilenetv2", "densenet121"],
         required=True,
         help="The pretrained CNN encoder to use.",
     )
@@ -135,9 +135,7 @@ if __name__ == "__main__":
     centers = create_image_centers(images_path, annots)
     data = split_data(centers)
 
-    filename = args.encoder.replace("_", "")
-
-    if args.encoder == "mobilenet_v2":
+    if args.encoder == "mobilenetv2":
         model = GridBoxMobileNet()
         encoder = model.backbone.encoder.features
 
@@ -258,7 +256,7 @@ if __name__ == "__main__":
             no_improve = 0
             best_loss = val_loss
             ema.copy_to()
-            torch.save(model.state_dict(), f"{filename}.bin")
+            torch.save(model.state_dict(), f"{args.encoder}.bin")
             ema.restore()
         else:
             no_improve += 1

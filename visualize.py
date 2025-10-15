@@ -24,7 +24,7 @@ def visualize_slot_points(
     path: Optional[Path],
     filename: Optional[str],
     point_color: str = "red",
-    point_size: int = 40,
+    point_size: int = 30,
 ) -> None:
     """Visualize predicted slot centers overlaid on the input image."""
     # Denormalize image from ImageNet preprocessing

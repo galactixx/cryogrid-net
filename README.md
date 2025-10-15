@@ -26,10 +26,10 @@ pip install -r requirements.txt --extra-index-url https://download.pytorch.org/w
 ## Usage
 
 ```bash
-python train.py --encoder=mobilenet_v2    # Train with MobileNetV2 encoder
-python train.py --encoder=densenet121     # Train with DenseNet121 encoder
-python test.py --encoder=mobilenet_v2     # Test with MobileNetV2 encoder
-python test.py --encoder=densenet121      # Test with DenseNet121 encoder
+python train.py --encoder=mobilenetv2    # Train with MobileNetV2 encoder
+python train.py --encoder=densenet121    # Train with DenseNet121 encoder
+python test.py --encoder=mobilenetv2     # Test with MobileNetV2 encoder
+python test.py --encoder=densenet121     # Test with DenseNet121 encoder
 ```
 
 ## Overview
@@ -38,7 +38,7 @@ This model automates slot center detection in grid boxes for cryo-electron micro
 
 ## Model Architecture
 
-- **Backbone Options**: MobileNetV2 or DenseNet121 encoder
+- **Encoder Options**: MobileNetV2 or DenseNet121 encoder
 - **Architecture**: U-Net decoder for spatial localization
 - **Output**: 4-channel heatmap prediction (one per slot center)
 - **Input**: RGB images resized to 960×512 pixels
@@ -48,6 +48,7 @@ This model automates slot center detection in grid boxes for cryo-electron micro
 ## Dataset
 
 - **Images**: Grid box photographs with varying conditions
+- **Size**: 986 images collected
 - **Annotations**: CSV with slot center coordinates (X, Y) for each slot type (L, T, R, B)
 - **Format**: Each image contains 4 slot center annotations
 - **Split**: Train/validation/test based on grid box positions
@@ -68,21 +69,45 @@ position-000001,img_000001.jpg,L,997,711
 
 ## Results
 
-- **Dataset**: 986 images collected
-- **MobileNetV2 Performance**: 5.16 pixel average error
-- **DenseNet121 Performance**: 4.21 pixel average error
-- **Relative Error**: 0.44% (4.21/960 max dimension of 960×512 image)
-- **Model Comparison**: DenseNet121 shows 18.4% improvement over MobileNetV2
+| Encoder | Average Error (pixels) | Relative Error (%) | Improvement |
+|---------|----------------------|-------------------|-------------|
+| MobileNetV2 | 6.05 | 0.63 | - |
+| DenseNet121 | 4.21 | 0.44 | 30.4% better |
+
+*Relative error calculated as average error divided by maximum image dimension (960 pixels)*
 
 ## Sample Predictions
 
-Below are examples of the model's slot center predictions on test images:
+Below are examples comparing MobileNetV2 and DenseNet121 slot center predictions on test images:
 
-![Prediction Example 1](examples/preds_img_000247.jpg)
-*Grid box slot center detection - Image 000247*
+---
 
-![Prediction Example 2](examples/preds_img_000633.jpg)
-*Grid box slot center detection - Image 000633*
+### Image 000216
 
-![Prediction Example 3](examples/preds_img_000800.jpg)
-*Grid box slot center detection - Image 000800*
+![MobileNetV2 Prediction - Image 000216](examples/mobilenetv2_preds_img_000216.jpg)
+*MobileNetV2 Prediction*
+
+![DenseNet121 Prediction - Image 000216](examples/densenet121_preds_img_000216.jpg)
+*DenseNet121 Prediction*
+
+---
+
+### Image 000633
+
+![MobileNetV2 Prediction - Image 000633](examples/mobilenetv2_preds_img_000633.jpg)
+*MobileNetV2 Prediction*
+
+![DenseNet121 Prediction - Image 000633](examples/densenet121_preds_img_000633.jpg)
+*DenseNet121 Prediction*
+
+---
+
+### Image 000800
+
+![MobileNetV2 Prediction - Image 000800](examples/mobilenetv2_preds_img_000800.jpg)
+*MobileNetV2 Prediction*
+
+![DenseNet121 Prediction - Image 000800](examples/densenet121_preds_img_000800.jpg)
+*DenseNet121 Prediction*
+
+---

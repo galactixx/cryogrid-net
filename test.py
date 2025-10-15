@@ -65,6 +65,7 @@ transforms = [
 
 
 def tta_evaluate(
+    encoder: str,
     model: torch.nn.Module,
     data: DataSplit,
     display: bool = True,
@@ -121,7 +122,7 @@ def tta_evaluate(
                         points=img_points_agg,
                         save=save,
                         path=path,
-                        filename=f"preds_{data.test[cur_idx + index].path.name}",
+                        filename=f"{encoder}_preds_{data.test[cur_idx + index].path.name}",
                     )
 
             cur_idx += imgs.size(0)
@@ -138,18 +139,14 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--encoder",
-        choices=["mobilenet_v2", "densenet121"],
+        choices=["mobilenetv2", "densenet121"],
         required=True,
         help="The pretrained CNN encoder to use.",
     )
     args = parser.parse_args()
+    filename = f"{args.encoder}.bin"
 
-    if args.encoder == "mobilenet_v2":
-        filename = "mobilenetv2.bin"
-        model = GridBoxMobileNet()
-    else:
-        filename = "densenet121.bin"
-        model = GridBoxDenseNet()
+    model = GridBoxMobileNet() if args.encoder == "mobilenetv2" else GridBoxDenseNet()
 
     seed_everything(seed=SEED)
     images_path, annots_path = get_dataset_paths()
@@ -169,5 +166,5 @@ if __name__ == "__main__":
 
     centers = create_image_centers(images_path, annots)
     data = split_data(centers)
-    test_dist = tta_evaluate(model=model, data=data)
+    test_dist = tta_evaluate(encoder=args.encoder, model=model, data=data)
     print(f"Test avg distance: {test_dist:.3f}...")
