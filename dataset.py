@@ -45,10 +45,12 @@ class SlotCenterPoint:
 
 
 def get_normalizer() -> transforms.Normalize:
+    """Return ImageNet mean/std normalization transform for tensors."""
     return transforms.Normalize(INET_MEAN, INET_STD)
 
 
 def get_resizer() -> transforms.Compose:
+    """Return resize and tensor conversion transform to target size (512x960)."""
     return transforms.Compose(
         [
             transforms.ToPILImage(),
@@ -59,6 +61,7 @@ def get_resizer() -> transforms.Compose:
 
 
 def get_transforms() -> PairCompose:
+    """Return composed data augmentations for image/heatmap pairs."""
     return PairCompose(
         [
             RandomPairHorizontalFlip(),
@@ -70,12 +73,14 @@ def get_transforms() -> PairCompose:
 
 
 def _load_image(path: Path) -> np.ndarray:
+    """Load an image from disk as RGB numpy array using OpenCV."""
     img = cv2.imread(path, cv2.IMREAD_COLOR)
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     return img
 
 
 def preprocess_image_inference(path: Path) -> torch.Tensor:
+    """Preprocess a single image for inference (resize and normalize)."""
     img = _load_image(path=path)
     img_t = get_resizer()(img)
     img_t = get_normalizer()(img_t)
@@ -136,6 +141,7 @@ class GridBoxDataset(Dataset):
         return len(self.centers)
 
     def _make_rhombus_heatmap(cx: float, cy: float) -> np.ndarray:
+        """Create a rhombus-shaped heatmap centered at (cx, cy)."""
         ys = np.arange(self.out_h, dtype=np.float32)[:, None]
         xs = np.arange(self.out_w, dtype=np.float32)[None, :]
 

@@ -23,6 +23,7 @@ from dataset import GridBoxDataset, ImageCenters, SlotCenterPoint
 
 
 def worker_init_fn(worker_id: int) -> None:
+    """Seed NumPy and Python RNGs uniquely per worker for reproducible loading."""
     np.random.seed(SEED + worker_id)
     random.seed(SEED + worker_id)
 

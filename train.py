@@ -42,7 +42,7 @@ class FocalLoss(nn.Module):
         self,
         alpha: float = 1.0,
         gamma: float = 2.0,
-        reduction: str = "mean",
+        reduction: Literal["mean", "sum"] = "mean",
     ) -> None:
         super().__init__()
         self.alpha = alpha
@@ -56,11 +56,7 @@ class FocalLoss(nn.Module):
         pt = torch.exp(-bce_loss)
         focal_loss = self.alpha * (1 - pt) ** self.gamma * bce_loss
 
-        if self.reduction == "mean":
-            return focal_loss.mean()
-        elif self.reduction == "sum":
-            return focal_loss.sum()
-        return focal_loss
+        return focal_loss.mean() if self.reduction == "mean" else focal_loss.sum()
 
 
 def train_evaluate(
