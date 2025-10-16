@@ -20,9 +20,9 @@ from constants import INET_MEAN, INET_STD, NUM_CENTERS
 def visualize_slot_points(
     img_t: torch.Tensor,
     points: List[torch.Tensor],
-    save: bool,
-    path: Optional[Path],
-    filename: Optional[str],
+    save: bool = False,
+    path: Optional[Path] = None,
+    filename: Optional[str] = None,
     point_color: str = "red",
     point_size: int = 30,
 ) -> None:

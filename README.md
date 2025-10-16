@@ -28,6 +28,7 @@ pip install -r requirements.txt --extra-index-url https://download.pytorch.org/w
 ```bash
 python train.py --encoder={mobilenetv2|densenet121|resnet18}
 python test.py --encoder={mobilenetv2|densenet121|resnet18}
+python -m infer /path/to/image.jpg --encoder={mobilenetv2|densenet121|resnet18}
 ```
 
 ## Overview

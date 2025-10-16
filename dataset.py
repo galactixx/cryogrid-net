@@ -44,6 +44,44 @@ class SlotCenterPoint:
         return self.x * SCALE_X
 
 
+def get_normalizer() -> transforms.Normalize:
+    return transforms.Normalize(INET_MEAN, INET_STD)
+
+
+def get_resizer() -> transforms.Compose:
+    return transforms.Compose(
+        [
+            transforms.ToPILImage(),
+            transforms.Resize((512, 960)),
+            transforms.ToTensor(),
+        ]
+    )
+
+
+def get_transforms() -> PairCompose:
+    return PairCompose(
+        [
+            RandomPairHorizontalFlip(),
+            RandomPairVerticalFlip(),
+            RandomPairBrightness(),
+            RandomPairContrast(),
+        ]
+    )
+
+
+def _load_image(path: Path) -> np.ndarray:
+    img = cv2.imread(path, cv2.IMREAD_COLOR)
+    img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
+    return img
+
+
+def preprocess_image_inference(path: Path) -> torch.Tensor:
+    img = _load_image(path=path)
+    img_t = get_resizer()(img)
+    img_t = get_normalizer()(img_t)
+    return img_t
+
+
 @dataclass(frozen=True)
 class ImageCenters:
     """Container for all slot center points in a single image."""
@@ -90,29 +128,14 @@ class GridBoxDataset(Dataset):
         self.softness = softness
         self.train = train
 
-        self.normalize = transforms.Normalize(INET_MEAN, INET_STD)
-        self.resizer = transforms.Compose(
-            [
-                transforms.ToPILImage(),
-                transforms.Resize((512, 960)),
-                transforms.ToTensor(),
-            ]
-        )
-
-        self.transforms = PairCompose(
-            [
-                RandomPairHorizontalFlip(),
-                RandomPairVerticalFlip(),
-                RandomPairBrightness(),
-                RandomPairContrast(),
-            ]
-        )
+        self.normalizer = get_normalizer()
+        self.resizer = get_resizer()
+        self.transforms = get_transforms()
 
     def __len__(self) -> int:
         return len(self.centers)
 
-    def _make_rhombus_heatmap(self, cx: float, cy: float) -> np.ndarray:
-        """Generate rhombus-shaped heatmap centered at (cx, cy)."""
+    def _make_rhombus_heatmap(cx: float, cy: float) -> np.ndarray:
         ys = np.arange(self.out_h, dtype=np.float32)[:, None]
         xs = np.arange(self.out_w, dtype=np.float32)[None, :]
 
@@ -133,10 +156,6 @@ class GridBoxDataset(Dataset):
     ) -> Tuple[int, torch.Tensor, torch.Tensor, torch.Tensor]:
         center = self.centers[idx]
 
-        # Load and convert image from BGR to RGB
-        img = cv2.imread(center.path, cv2.IMREAD_COLOR)
-        img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
-
         # Get scaled coordinates for heatmap generation
         pts = np.array(center.points, dtype=np.float32).reshape(-1, 2)
 
@@ -149,6 +168,7 @@ class GridBoxDataset(Dataset):
         heatmaps = np.stack(heatmaps, axis=0)
         heatmap_t = torch.from_numpy(heatmaps)
 
+        img = _load_image(path=center.path)
         img_t = self.resizer(img)
         if self.train:
             img_t, heatmap_t = self.transforms(img_t, heatmap_t)

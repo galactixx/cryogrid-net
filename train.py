@@ -27,7 +27,7 @@ from tqdm.auto import tqdm
 
 from constants import RESIZE_W, SEED
 from dataset import ImageCenters
-from gridbox_net import GridBoxDenseNet, GridBoxMobileNet, GridBoxResNet
+from model import GridBoxDenseNet, GridBoxMobileNet, GridBoxResNet
 from preprocessing import create_image_centers, split_data
 from utils import ParamGroup, ProgressiveUnfreezer, get_dataset_paths, seed_everything
 
@@ -117,6 +117,7 @@ def train_evaluate(
 
 
 if __name__ == "__main__":
+    seed_everything(seed=SEED)
     parser = argparse.ArgumentParser(
         description="Train a UNet heatmap regression model using different CNN encoders."
     )
@@ -128,7 +129,6 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
 
-    seed_everything(seed=SEED)
     images_path, annots_path = get_dataset_paths()
 
     annots = pd.read_csv(annots_path)

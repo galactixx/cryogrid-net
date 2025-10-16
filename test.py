@@ -22,7 +22,7 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
 from constants import NUM_CENTERS, RESIZE_H, RESIZE_W, SEED
-from gridbox_net import GridBoxDenseNet, GridBoxMobileNet, GridBoxResNet
+from model import GridBoxDenseNet, GridBoxMobileNet, GridBoxResNet
 from preprocessing import DataSplit, create_image_centers, split_data
 from transforms import PairHorizontalFlip, PairVerticalFlip
 from utils import get_dataset_paths, seed_everything
@@ -107,9 +107,10 @@ def tta_evaluate(
                     positions[pos] = list()
 
                 img_pts = pts[img_idx, :]
-                img_points_agg: List[torch.Tensor] = [None] * NUM_CENTERS
-                for pt_idx, img_points in t_points.items():
-                    img_points_agg[pt_idx] = torch.stack(img_points).float().mean(dim=0)
+                img_points_agg = torch.stack(
+                    torch.stack(t_points[pt_idx]).float().mean(dim=0)
+                    for pt_idx in t_points.keys()
+                )
 
                 agg_pts = torch.stack(img_points_agg)
                 gt_pts = img_pts.view(NUM_CENTERS, 2)
@@ -134,6 +135,7 @@ def tta_evaluate(
 
 
 if __name__ == "__main__":
+    seed_everything(seed=SEED)
     parser = argparse.ArgumentParser(
         description="Test a UNet heatmap regression model using different CNN encoders."
     )
@@ -153,7 +155,6 @@ if __name__ == "__main__":
     else:
         model = GridBoxDenseNet()
 
-    seed_everything(seed=SEED)
     images_path, annots_path = get_dataset_paths()
     annots = pd.read_csv(annots_path)
 
