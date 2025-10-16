@@ -27,7 +27,7 @@ from tqdm.auto import tqdm
 
 from constants import RESIZE_W, SEED
 from dataset import ImageCenters
-from gridbox_net import GridBoxDenseNet, GridBoxMobileNet
+from gridbox_net import GridBoxDenseNet, GridBoxMobileNet, GridBoxResNet
 from preprocessing import create_image_centers, split_data
 from utils import ParamGroup, ProgressiveUnfreezer, get_dataset_paths, seed_everything
 
@@ -122,7 +122,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--encoder",
-        choices=["mobilenetv2", "densenet121"],
+        choices=["mobilenetv2", "densenet121", "resnet18"],
         required=True,
         help="The pretrained CNN encoder to use.",
     )
@@ -144,6 +144,18 @@ if __name__ == "__main__":
         stage3 = encoder[4:7]
         stage4 = encoder[7:14]
         stage5 = encoder[14:19]
+    elif args.encoder == "resnet18":
+        model = GridBoxResNet()
+        encoder = model.backbone.encoder
+
+        stage1 = torch.nn.Sequential(
+            encoder.conv1,
+            encoder.bn1,
+        )
+        stage2 = encoder.layer1
+        stage3 = encoder.layer2
+        stage4 = encoder.layer3
+        stage5 = encoder.layer4
     else:
         model = GridBoxDenseNet()
         encoder = model.backbone.encoder.features

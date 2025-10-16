@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import torch
 
-from constants import INET_MEAN, INET_STD
+from constants import INET_MEAN, INET_STD, NUM_CENTERS
 
 
 def visualize_slot_points(
@@ -32,15 +32,14 @@ def visualize_slot_points(
     img = (img * np.array(INET_STD) + np.array(INET_MEAN)).clip(0, 1)
 
     labels = ["Left", "Top", "Right", "Bottom"]
-    ncols = len(points)
-    plt.figure(figsize=(4 * ncols, 4))
+    plt.figure(figsize=(4 * NUM_CENTERS, NUM_CENTERS))
 
     col = 1
 
     # Plot each individual point
     for i, label in enumerate(labels):
         pt = points[i].cpu()
-        ax = plt.subplot(1, ncols, col)
+        ax = plt.subplot(1, NUM_CENTERS, col)
         ax.imshow(img)
         ax.scatter(pt[0], pt[1], c=point_color, s=point_size, edgecolors="black")
         ax.set_title(f"{label} Point")

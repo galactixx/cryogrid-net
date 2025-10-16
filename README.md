@@ -26,10 +26,8 @@ pip install -r requirements.txt --extra-index-url https://download.pytorch.org/w
 ## Usage
 
 ```bash
-python train.py --encoder=mobilenetv2    # Train with MobileNetV2 encoder
-python train.py --encoder=densenet121    # Train with DenseNet121 encoder
-python test.py --encoder=mobilenetv2     # Test with MobileNetV2 encoder
-python test.py --encoder=densenet121     # Test with DenseNet121 encoder
+python train.py --encoder={mobilenetv2|densenet121|resnet18}
+python test.py --encoder={mobilenetv2|densenet121|resnet18}
 ```
 
 ## Overview
@@ -38,7 +36,7 @@ This model automates slot center detection in grid boxes for cryo-electron micro
 
 ## Model Architecture
 
-- **Encoder Options**: MobileNetV2 or DenseNet121 encoder
+- **Encoder Options**: MobileNetV2, DenseNet121, or ResNet18 encoder
 - **Architecture**: U-Net decoder for spatial localization
 - **Output**: 4-channel heatmap prediction (one per slot center)
 - **Input**: RGB images resized to 960×512 pixels
@@ -69,16 +67,17 @@ position-000001,img_000001.jpg,L,997,711
 
 ## Results
 
-| Encoder | Average Error (pixels) | Relative Error (%) | Improvement |
-|---------|----------------------|-------------------|-------------|
-| MobileNetV2 | 6.05 | 0.63 | - |
-| DenseNet121 | 4.21 | 0.44 | 30.4% better |
+| Encoder | Average Error (pixels) | Relative Error (%) | Training Epochs | Improvement |
+|---------|----------------------|-------------------|-----------------|-------------|
+| MobileNetV2 | 6.05 | 0.63 | 34 | - |
+| DenseNet121 | 4.21 | 0.44 | 38 | 30.4% better |
+| ResNet18 | 4.54 | 0.47 | 30 | 25.0% better |
 
 *Relative error calculated as average error divided by maximum image dimension (960 pixels)*
 
 ## Sample Predictions
 
-Below are examples comparing MobileNetV2 and DenseNet121 slot center predictions on test images:
+Below are examples comparing MobileNetV2, DenseNet121, and ResNet18 slot center predictions on test images:
 
 ---
 
@@ -90,6 +89,9 @@ Below are examples comparing MobileNetV2 and DenseNet121 slot center predictions
 ![DenseNet121 Prediction - Image 000216](examples/densenet121_preds_img_000216.jpg)
 *DenseNet121 Prediction*
 
+![ResNet18 Prediction - Image 000216](examples/resnet18_preds_img_000216.jpg)
+*ResNet18 Prediction*
+
 ---
 
 ### Image 000633
@@ -100,6 +102,9 @@ Below are examples comparing MobileNetV2 and DenseNet121 slot center predictions
 ![DenseNet121 Prediction - Image 000633](examples/densenet121_preds_img_000633.jpg)
 *DenseNet121 Prediction*
 
+![ResNet18 Prediction - Image 000633](examples/resnet18_preds_img_000633.jpg)
+*ResNet18 Prediction*
+
 ---
 
 ### Image 000800
@@ -109,5 +114,8 @@ Below are examples comparing MobileNetV2 and DenseNet121 slot center predictions
 
 ![DenseNet121 Prediction - Image 000800](examples/densenet121_preds_img_000800.jpg)
 *DenseNet121 Prediction*
+
+![ResNet18 Prediction - Image 000800](examples/resnet18_preds_img_000800.jpg)
+*ResNet18 Prediction*
 
 ---

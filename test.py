@@ -22,7 +22,7 @@ from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
 from constants import NUM_CENTERS, RESIZE_H, RESIZE_W, SEED
-from gridbox_net import GridBoxDenseNet, GridBoxMobileNet
+from gridbox_net import GridBoxDenseNet, GridBoxMobileNet, GridBoxResNet
 from preprocessing import DataSplit, create_image_centers, split_data
 from transforms import PairHorizontalFlip, PairVerticalFlip
 from utils import get_dataset_paths, seed_everything
@@ -139,14 +139,19 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--encoder",
-        choices=["mobilenetv2", "densenet121"],
+        choices=["mobilenetv2", "densenet121", "resnet18"],
         required=True,
         help="The pretrained CNN encoder to use.",
     )
     args = parser.parse_args()
     filename = f"{args.encoder}.bin"
 
-    model = GridBoxMobileNet() if args.encoder == "mobilenetv2" else GridBoxDenseNet()
+    if args.encoder == "mobilenetv2":
+        model = GridBoxMobileNet()
+    elif args.encoder == "resnet18":
+        model = GridBoxResNet()
+    else:
+        model = GridBoxDenseNet()
 
     seed_everything(seed=SEED)
     images_path, annots_path = get_dataset_paths()

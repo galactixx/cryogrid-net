@@ -11,6 +11,8 @@ import segmentation_models_pytorch as smp
 import torch
 import torch.nn as nn
 
+from constants import NUM_CENTERS
+
 
 class GridBoxNet(nn.Module):
     """Base U-Net model for slot center detection with configurable encoder."""
@@ -19,7 +21,7 @@ class GridBoxNet(nn.Module):
         self,
         encoder: str,
         pretrained: bool = True,
-        num_classes: int = 4,
+        num_classes: int = NUM_CENTERS,
     ) -> None:
         super().__init__()
         self.encoder = encoder
@@ -43,11 +45,18 @@ class GridBoxMobileNet(GridBoxNet):
     """MobileNetV2-based U-Net model optimized for slot center detection."""
 
     def __init__(self, pretrained: bool = True) -> None:
-        super().__init__(encoder="mobilenet_v2", pretrained=pretrained, num_classes=4)
+        super().__init__(encoder="mobilenet_v2", pretrained=pretrained)
 
 
 class GridBoxDenseNet(GridBoxNet):
     """DenseNet121-based U-Net model optimized for slot center detection."""
 
     def __init__(self, pretrained: bool = True) -> None:
-        super().__init__(encoder="densenet121", pretrained=pretrained, num_classes=4)
+        super().__init__(encoder="densenet121", pretrained=pretrained)
+
+
+class GridBoxResNet(GridBoxNet):
+    """Resnet18-based U-Net model optimized for slot center detection."""
+
+    def __init__(self, pretrained: bool = True) -> None:
+        super().__init__(encoder="resnet18", pretrained=pretrained)
