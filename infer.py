@@ -1,3 +1,12 @@
+"""
+Inference script for GridBox-Net models.
+
+Performs inference on individual gridbox images using pretrained UNet-based
+heatmap regression models with multiple CNN encoders (ResNet18, DenseNet121,
+MobileNetV2). Employs test-time augmentation to improve accuracy and
+visualizes detected slot points on the input image.
+"""
+
 import argparse
 import os
 from pathlib import Path
