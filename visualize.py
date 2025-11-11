@@ -8,7 +8,7 @@ predicted slot centers with customizable markers, and saving visualization resul
 
 import os
 from pathlib import Path
-from typing import List, Literal, Optional
+from typing import List, Optional
 
 import matplotlib.pyplot as plt
 import numpy as np

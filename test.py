@@ -10,7 +10,6 @@ plots showing predicted slot centers overlaid on test images.
 import argparse
 import random
 import warnings
-from dataclasses import dataclass
 from pathlib import Path
 from typing import Dict, List, Optional
 
@@ -18,7 +17,6 @@ import numpy as np
 import pandas as pd
 import torch
 from huggingface_hub import hf_hub_download
-from torch.utils.data import DataLoader
 from tqdm.auto import tqdm
 
 from constants import NUM_CENTERS, RESIZE_H, RESIZE_W, SEED

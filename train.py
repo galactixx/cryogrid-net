@@ -9,8 +9,7 @@ Includes comprehensive validation evaluation and automatic model checkpointing.
 
 import argparse
 import warnings
-from pathlib import Path
-from typing import Dict, List, Literal, Tuple, TypeAlias
+from typing import Dict, List, Literal, Tuple
 
 import numpy as np
 import pandas as pd
@@ -18,7 +17,6 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as Fnn
 from torch.cuda.amp import GradScaler, autocast
-from torch.nn import BCEWithLogitsLoss
 from torch.optim import AdamW
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 from torch.utils.data import DataLoader
@@ -26,7 +24,6 @@ from torch_ema import ExponentialMovingAverage
 from tqdm.auto import tqdm
 
 from constants import RESIZE_W, SEED
-from dataset import ImageCenters
 from model import GridBoxDenseNet, GridBoxMobileNet, GridBoxResNet
 from preprocessing import create_image_centers, split_data
 from utils import ParamGroup, ProgressiveUnfreezer, get_dataset_paths, seed_everything

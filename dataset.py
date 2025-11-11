@@ -13,7 +13,7 @@ from typing import List, Tuple
 import cv2
 import numpy as np
 import torch
-from torch.utils.data import DataLoader, Dataset
+from torch.utils.data import Dataset
 from torchvision import transforms
 
 from constants import INET_MEAN, INET_STD, SCALE_X, SCALE_Y
