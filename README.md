@@ -120,3 +120,41 @@ Below are examples comparing MobileNetV2, DenseNet121, and ResNet18 slot center 
 *ResNet18 Prediction*
 
 ---
+
+## Out-of-Distribution Examples
+
+Below are out-of-distribution (OOD) examples — images that differ from the training/test set in lighting, framing, or content — to show how the models behave on unexpected inputs. Only MobileNetV2 and DenseNet121 OOD predictions are available in the `examples_ood/` folder.
+
+*Note: ResNet18 did not generalize as well on out-of-distribution samples, so ResNet18 OOD predictions are not included here.*
+
+---
+
+### OOD Image 001
+
+![MobileNetV2 OOD - Image 001](examples_ood/mobilenetv2_ood_001.jpg)
+*MobileNetV2 Prediction (OOD)*
+
+![DenseNet121 OOD - Image 001](examples_ood/densenet121_ood_001.jpg)
+*DenseNet121 Prediction (OOD)*
+
+---
+
+### OOD Image 002
+
+![MobileNetV2 OOD - Image 002](examples_ood/mobilenetv2_ood_002.jpg)
+*MobileNetV2 Prediction (OOD)*
+
+![DenseNet121 OOD - Image 002](examples_ood/densenet121_ood_002.jpg)
+*DenseNet121 Prediction (OOD)*
+
+---
+
+### OOD Image 003
+
+![MobileNetV2 OOD - Image 003](examples_ood/mobilenetv2_ood_003.jpg)
+*MobileNetV2 Prediction (OOD)*
+
+![DenseNet121 OOD - Image 003](examples_ood/densenet121_ood_003.jpg)
+*DenseNet121 Prediction (OOD)*
+
+---

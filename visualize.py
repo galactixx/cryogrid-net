@@ -48,6 +48,7 @@ def visualize_slot_points(
 
     plt.tight_layout()
     if save:
+        assert filename is not None, "Filename must be provided when save=True"
         img_path = Path(os.getcwd() if path is None else path)
         plt.savefig(img_path / filename, dpi=300, bbox_inches="tight")
     plt.show()

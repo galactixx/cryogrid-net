@@ -10,7 +10,7 @@ import random
 from dataclasses import dataclass
 from functools import cached_property
 from pathlib import Path
-from typing import List, Literal, Set, Tuple, TypeAlias
+from typing import List, Literal, Set, TypeAlias
 
 import numpy as np
 import pandas as pd
